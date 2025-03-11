@@ -1,0 +1,10 @@
+﻿  Bullet.cpp
+  Fighter.cpp
+  Grenade.cpp
+  Room.cpp
+  Squire.cpp
+  Team.cpp
+  main.cpp
+C:\Michael\הנדסת תוכנה\שנה ג\בינה מלאכותית\פרוייקט סיום\Graphics\Graphics\main.cpp(260,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  Generating Code...
+  Graphics.vcxproj -> C:\Michael\הנדסת תוכנה\שנה ג\בינה מלאכותית\פרוייקט סיום\Graphics\Debug\Graphics.exe
