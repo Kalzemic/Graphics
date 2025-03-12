@@ -15,8 +15,8 @@ private:
 	const int color;
 public: 
 	Team(Room room, const int color);
-	~Team();
-	void TakeTurn();
+	~Team() { }
+	void TakeTurn(int board[MSZ][MSZ]);
 	int getColor() { return color; }
 	std::array<std::unique_ptr<Fighter>, 2>& getFighters() { return fighters; }
 	std::unique_ptr<Squire>& getSquire() { return squire; }

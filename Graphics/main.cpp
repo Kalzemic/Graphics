@@ -16,7 +16,7 @@ using namespace std;
 const int WIDTH = 700;
 const int HEIGHT = 700;
 
-const int NUM_ROOMS = 12;
+const int NUM_ROOMS = 6;
 
 const double WALL_COST = 5;
 const double SPACE_COST = 1;
@@ -24,7 +24,7 @@ const double SPACE_COST = 1;
 Room* rooms[NUM_ROOMS];
 Team* blue;
 Team* red;
-
+bool fight = false;
 bool bulletFired = false;
 bool grenadeThrown = false;
 Bullet* pb=nullptr;
@@ -300,6 +300,7 @@ void ShowDungeon()
 			case HEALTH:
 				glColor3d(0, 1, 0);
 				break;
+			
 			}
 			// show cell
 			glBegin(GL_POLYGON);
@@ -345,6 +346,19 @@ void idle()
 		pb->move(maze);
 	if (grenadeThrown)
 		pg->expand(maze);
+	if (fight)
+	{
+		if (rand() % 2)
+		{
+			blue->TakeTurn(maze);
+			red->TakeTurn(maze);
+		}
+		else
+		{
+			red->TakeTurn(maze);
+			blue->TakeTurn(maze);
+		}
+	}
 	glutPostRedisplay(); // indirect call to display
 }
 
@@ -362,6 +376,9 @@ void menu(int choice)
 		break;
 	case 3: // security map
 		GenerateSecurityMap();
+		break;
+	case 4:
+		fight = true;
 		break;
 	}
 }
@@ -396,6 +413,7 @@ int main(int argc, char* argv[])
 	glutAddMenuEntry("Fire bullet", 1);
 	glutAddMenuEntry("Throw Grenade", 2);
 	glutAddMenuEntry("Generate Security Map", 3);
+	glutAddMenuEntry("AI Fight", 4);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 

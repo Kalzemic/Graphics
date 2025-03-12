@@ -9,7 +9,7 @@ private:
 //	double 
 public:
 	Cell();
-	Cell(int r, int c, Cell* p) : row(r), col(c), target_row(0), target_col(0), parent(p) { }
+	Cell(int r, int c, Cell* p) : row(r), col(c), target_row(0), target_col(0), parent(p), f(0.0), g(0.0), h(0.0) { }
 	Cell(int r, int c,int tr,int tc, double newg,Cell* p);
 	int getRow() { return row; }
 	int getCol() { return col; }

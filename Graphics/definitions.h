@@ -2,6 +2,7 @@
 const int MSZ = 100;
 
 const int SPACE = 1;
+const int BLACK = 5;
 const int WALL = 0;
 const int AMMO = 2;
 const int HEALTH = 3;

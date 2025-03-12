@@ -14,19 +14,23 @@ private:
 	int ammo;
 	int health;
 	int character;
+	
+
 public:
 	Fighter(Room room, const int color);
 	~Fighter() {}
 
 
 	//Getters
-	bool enemySpotted;
 	int getX() { return x; }
 	int getY() { return y; }
 	bool isLowAmmo() { return ammo < 4; }
 	bool isDamaged() { return health < 50; }
 
-	Cell* SearchEnemy(int board[MSZ][MSZ]);
+	Cell* Search(int board[MSZ][MSZ], int targetcolor);
+	void Action(int board[MSZ][MSZ]);
+	void Attack(int board[MSZ][MSZ]);
+	void Move(int board[MSZ][MSZ],Cell* target);
 };
 
 

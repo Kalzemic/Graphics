@@ -6,6 +6,8 @@ Team::Team(Room room, const int color) : color(color) {
     squire = std::make_unique<Squire>(room, color);
 }
 
-void Team::TakeTurn() {
-
+void Team::TakeTurn(int board[MSZ][MSZ]) 
+{
+    fighters[0]->Action(board);
+    fighters[1]->Action(board);
 }
