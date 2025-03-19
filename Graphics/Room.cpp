@@ -28,22 +28,21 @@ bool Room::Overlap(int cx, int cy, int w, int h)
 	int yOffset = abs(cy - centerY);
 	return xOffset<width/2+w/2+5 && yOffset < height / 2 + h / 2 + 5;
 }
-/*
-void Room::show(int board[MSZ][MSZ])
-{
-	int left, right, bottom, top;
 
-	left = centerX - width / 2;
-	right = centerX + width / 2;
-	bottom = centerY - height / 2;
-	top = centerY + height / 2;
-
-	glColor3d(1, 1, 1); // white
-	glBegin(GL_POLYGON);
-	glVertex2d(left, bottom);
-	glVertex2d(left, top);
-	glVertex2d(right, top);
-	glVertex2d(right, bottom);
-	glEnd();
-}
-*/
+//void Room::show(int board[MSZ][MSZ])
+//{
+//	int left, right, bottom, top;
+//
+//	left = centerX - width / 2;
+//	right = centerX + width / 2;
+//	bottom = centerY - height / 2;
+//	top = centerY + height / 2;
+//
+//	glColor3d(1, 1, 1); // white
+//	glBegin(GL_POLYGON);
+//	glVertex2d(left, bottom);
+//	glVertex2d(left, top);
+//	glVertex2d(right, top);
+//	glVertex2d(right, bottom);
+//	glEnd();
+//}

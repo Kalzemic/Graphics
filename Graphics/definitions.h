@@ -8,10 +8,10 @@ const int AMMO = 2;
 const int HEALTH = 3;
 const double PI = 3.14;
 const double SECURITY_FACTOR = 0.001;
-
+const int NUM_ROOMS = 6;
 const int RED = 200;
 const int BLUE = 300;
-
+const int BULLET = 400;
 const int RED_SQUIRE = 202;
 const int BLUE_SQUIRE = 302;
 

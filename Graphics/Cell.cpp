@@ -30,3 +30,9 @@ void Cell::ComputeH()
 {
 	h = abs(row - target_row) + abs(col - target_col);
 }
+
+
+double Cell::distance()
+{
+	return sqrt(((row - target_row) ^ 2) + ((col - target_col) ^ 2));
+}

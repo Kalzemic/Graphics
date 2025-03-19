@@ -11,19 +11,10 @@ Bullet::Bullet(double xx, double yy, double angle)
 	dirX = cos(angle);
 	dirY = sin(angle);
 	speed = 0.3;
-	isMoving = false;
+	isMoving = true;;
 }
 
-void Bullet::move(int maze[MSZ][MSZ])
-{
-	if (isMoving)
-	{
-		x += speed * dirX;
-		y += speed * dirY;
-		if (maze[(int)y][(int)x] == WALL)
-			isMoving = false;
-	}
-}
+
 
 void Bullet::show()
 {
@@ -45,3 +36,43 @@ void Bullet::SimulateExplosion(int maze[MSZ][MSZ], double sm[MSZ][MSZ])
 		move(maze);
 	}
 }
+
+void Bullet::move(int maze[MSZ][MSZ])
+{
+    if (state == BulletState::MOVING)
+    {
+        // Clear previous position
+        if (maze[(int)y][(int)x] == BULLET)
+            maze[(int)y][(int)x] = SPACE;
+
+        // Move bullet
+        x += speed * dirX;
+        y += speed * dirY;
+
+        // Check collision
+        if (maze[(int)y][(int)x] == WALL)
+        {
+            state = BulletState::HIT;
+            isMoving = false;
+        }
+        else
+        {
+            maze[(int)y][(int)x] = BULLET;
+        }
+    }
+}
+
+void Bullet::Update(int board[MSZ][MSZ])
+{
+    switch (state)
+    {
+    case BulletState::MOVING:
+        move(board);
+        break;
+
+    case BulletState::HIT:
+        isMoving = false;
+        break;
+    }
+}
+

@@ -1,3 +1,14 @@
-﻿  main.cpp
-C:\Michael\הנדסת תוכנה\שנה ג\בינה מלאכותית\פרוייקט סיום\Graphics\Graphics\main.cpp(260,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+﻿  Bullet.cpp
+  Cell.cpp
+  CompareCells.cpp
+  Fighter.cpp
+  Grenade.cpp
+  main.cpp
+C:\Michael\הנדסת תוכנה\שנה ג\בינה מלאכותית\פרוייקט סיום\Graphics\Graphics\main.cpp(257,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Michael\הנדסת תוכנה\שנה ג\בינה מלאכותית\פרוייקט סיום\Graphics\Graphics\main.cpp(349,20): warning C4018: '<': signed/unsigned mismatch
+C:\Michael\הנדסת תוכנה\שנה ג\בינה מלאכותית\פרוייקט סיום\Graphics\Graphics\main.cpp(389,6): warning C4326: return type of 'main' should be 'int' instead of 'void'
+  Room.cpp
+  Squire.cpp
+  Team.cpp
+  Generating Code...
   Graphics.vcxproj -> C:\Michael\הנדסת תוכנה\שנה ג\בינה מלאכותית\פרוייקט סיום\Graphics\Debug\Graphics.exe

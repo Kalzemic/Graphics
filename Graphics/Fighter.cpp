@@ -1,158 +1,172 @@
 #include "Fighter.h"
+#include "Bullet.h"
+#include "Cell.h"
+#include "CompareCells.h"
 #include "random"
 #include <stack>
 #include <queue>
-Fighter::Fighter(Room room, const int color) : health(100), ammo(10), character(std::rand() % 3), color(color)
+#include <vector>
+#include <array>
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <memory>
+#include <unordered_map>
+
+
+Fighter::Fighter(Room room, const int color) : health(100), ammo(10), character(std::rand() % 3), color(color), state(FighterState::IDLE)
 {
-	x = rand() % room.getWidth();
-	x += room.getCenterX();
-	x -= (room.getWidth() / 2);
-	y = rand() % room.getHeight();
-	y += room.getCenterY();
-	y -= (room.getHeight() / 2);
+    x = rand() % room.getWidth();
+    x += room.getCenterX();
+    x -= (room.getWidth() / 2);
+    y = rand() % room.getHeight();
+    y += room.getCenterY();
+    y -= (room.getHeight() / 2);
 }
 
-void Fighter::Attack(int board[MSZ][MSZ])
+bool Fighter::HasLineOfSight(int board[MSZ][MSZ], Cell* target)
 {
-	Cell* target = Search(board, 500-color);
-		if (target->getRow() == y)
-		{
-			for (int i = std::min(x, target->getCol()); i < std::max(x, target->getCol());i++)
-			{
-				if (board[y][i] == WALL)
-				{
-					Move(board, target);
-					delete target;
-					return;
-				}
-			}
-			///shoot
+    if (!target) return false;
+    int targetX = target->getCol();
+    int targetY = target->getRow();
 
-			return;
-		}
-		if (target->getCol() == x)
-		{
-			for (int i = std::min(y, target->getRow()); i < std::max(y, target->getRow());i++)
-			{
-				if (board[i][x] == WALL)
-				{
-					Move(board, target);
-					delete target;
-					return;
-				}
-			}
-			///shoot
-			return;
-		}
-		Move(board,target);
-		delete target;
-		return;
-
+    if (x == targetX) // Vertical check
+    {
+        int start = std::min(y, targetY);
+        int end = std::max(y, targetY);
+        for (int i = start + 1; i < end; i++)
+        {
+            if (board[i][x] == WALL)
+                return false;
+        }
+        return true;
+    }
+    else if (y == targetY) // Horizontal check
+    {
+        int start = std::min(x, targetX);
+        int end = std::max(x, targetX);
+        for (int i = start + 1; i < end; i++)
+        {
+            if (board[y][i] == WALL)
+                return false;
+        }
+        return true;
+    }
+    return false;
 }
 
-
-Cell* Fighter::Search(int board[MSZ][MSZ], int targetcolor)
+Cell* Fighter::Search(int board[MSZ][MSZ], int targetColor)
 {
-	std::queue<Cell*> cells;
-	cells.push(new Cell(y, x, NULL));
-	while (!cells.empty())
-	{
-		Cell* current = cells.front();
-		cells.pop();
-		if (board[current->getRow()][current->getCol()] == targetcolor)
-		{
-			Cell* targetcell = current;
-			while (!cells.empty())
-			{
-				Cell* temp = cells.front();
-				cells.pop();
-				delete temp;
-			}
-			for (int i = 0;i < MSZ;i++)
-			{
-				for (int j = 0;j < MSZ;j++)
-				{
-					if (board[i][j] == BLACK)
-						board[i][j] = SPACE;
-				}
-			}
-			return targetcell;
-		}
-		
-		if (board[current->getRow() + 1][current->getCol()] == SPACE || board[current->getRow() + 1][current->getCol()] == targetcolor)
-		{
-			cells.push(new Cell(current->getRow() + 1, current->getCol(), current));
-			if(board[current->getRow() + 1][current->getCol()] == SPACE)
-				board[current->getRow() + 1][current->getCol()] = BLACK;
-		}
-		if (board[current->getRow() - 1][current->getCol()] == SPACE || board[current->getRow() - 1][current->getCol()] == targetcolor)
-		{
-			cells.push(new Cell(current->getRow() - 1, current->getCol(), current));
-			if(board[current->getRow() - 1][current->getCol()] == SPACE)
-				board[current->getRow() - 1][current->getCol()] = BLACK;
-		}
-		if (board[current->getRow()][current->getCol() + 1] == SPACE || board[current->getRow() ][current->getCol()+1] == targetcolor)
-		{
-			cells.push(new Cell(current->getRow(), current->getCol() + 1, current));
-			if(board[current->getRow() ][current->getCol()+1] == SPACE)
-				board[current->getRow() ][current->getCol()+1] = BLACK;
-		}
-		if (board[current->getRow()][current->getCol() - 1] == SPACE || board[current->getRow()][current->getCol()-1] == targetcolor)
-		{
-			cells.push(new Cell(current->getRow(), current->getCol() - 1, current));
-			if(board[current->getRow() ][current->getCol()-1] == SPACE)
-				board[current->getRow() ][current->getCol()-1] = BLACK;
-		}
-		delete current;
-	}
-	return nullptr; // Return nullptr if no target is found
+    std::priority_queue<Cell*, std::vector<Cell*>, CompareCells> pq;
+    std::unordered_map<int, std::unordered_map<int, Cell*>> visited;
+
+    pq.push(new Cell(y, x, -1, -1, 0, nullptr));
+
+    while (!pq.empty())
+    {
+        Cell* current = pq.top();
+        pq.pop();
+
+        int row = current->getRow();
+        int col = current->getCol();
+
+        if (board[row][col] == targetColor) // Found enemy
+        {
+            while (current->getParent() && current->getParent()->getParent()) // Find next move
+            {
+                current = current->getParent();
+            }
+            return new Cell(current->getRow(), current->getCol(), nullptr); // Return next step
+        }
+
+        std::vector<std::pair<int, int>> directions = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
+        for (auto& dir : directions)
+        {
+            int newRow = row + dir.first;
+            int newCol = col + dir.second;
+
+            if (board[newRow][newCol] == SPACE || board[newRow][newCol] == targetColor)
+            {
+                if (visited[newRow][newCol] == nullptr) // Only add if not already visited
+                {
+                    Cell* nextCell = new Cell(newRow, newCol, -1, -1, 0, current);
+                    pq.push(nextCell);
+                    visited[newRow][newCol] = nextCell;
+                }
+            }
+        }
+    }
+
+    return nullptr; // No valid move found
 }
 
-
-void Fighter::Move(int board[MSZ][MSZ], Cell* target)
+void Fighter::Move(int board[MSZ][MSZ], Cell* nextStep)
 {
-	Cell up(y + 1, x, target->getRow(), target->getCol(), 0, NULL);
-	Cell down(y - 1, x, target->getRow(), target->getCol(), 0, NULL);
-	Cell right(y, x + 1, target->getRow(), target->getCol(), 0, NULL);
-	Cell left(y, x - 1, target->getRow(), target->getCol(), 0, NULL);
+    if (!nextStep) return; // No valid move
 
-	int upcolor = board[up.getRow()][up.getCol()];
-	int downcolor = board[down.getRow()][down.getCol()];
-	int rightcolor = board[right.getRow()][right.getCol()];
-	int leftcolor = board[left.getRow()][left.getCol()];
+    board[y][x] = SPACE; // Clear old position
+    y = nextStep->getRow();
+    x = nextStep->getCol();
+    board[y][x] = color; // Update fighter position
 
-	std::vector<std::pair<Cell, int>> cells = {
-		{up, upcolor},
-		{down, downcolor},
-		{right, rightcolor},
-		{left, leftcolor}
-	};
-
-	// Sort cells by their heuristic value (H)
-	std::sort(cells.begin(), cells.end(), [](const std::pair<Cell, int>& a, const std::pair<Cell, int>& b) {
-		Cell cell1 = a.first;
-		Cell cell2 = b.first;
-		return cell1.getH() < cell2.getH();
-		});
-
-	board[y][x] = SPACE;
-
-	for (const auto& cell : cells)
-	{
-		if (cell.second == SPACE)
-		{
-			Cell temp = cell.first;
-			y = temp.getRow();
-			x = temp.getCol();
-			break;
-		}
-	}
-
-	board[y][x] = color;
+    delete nextStep; // Free memory to prevent leaks
 }
 
 
-void Fighter::Action(int board[MSZ][MSZ])
+
+void Fighter::Shoot(std::vector<std::unique_ptr<Bullet>>& bullets, Fighter& target)
 {
-	Attack(board);
+    if (ammo > 0)
+    {
+        ammo--;
+        double angle = atan2(target.getY() - y, target.getX() - x);
+        bullets.push_back(std::make_unique<Bullet>(x, y, angle));
+    }
 }
+
+void Fighter::Action(int board[MSZ][MSZ], std::array<std::unique_ptr<Fighter>, 2>& fighters, std::vector<std::unique_ptr<Bullet>>& bullets)
+{
+    if (health <= 0)
+    {
+        state = FighterState::DEAD;
+        board[y][x] = SPACE; // Remove fighter from the board
+        return;
+    }
+
+    Cell* targetCell = Search(board, 500 - color);
+
+    switch (state)
+    {
+    case FighterState::IDLE:
+        state = FighterState::MOVING;
+        break;
+
+    case FighterState::MOVING:
+        if (targetCell)
+        {
+            Move(board, targetCell); // Move() now deletes the cell
+            if (HasLineOfSight(board, targetCell))
+                state = FighterState::ATTACKING;
+        }
+        break;
+
+    case FighterState::ATTACKING:
+        if (targetCell && HasLineOfSight(board, targetCell))
+        {
+            for (auto& enemy : fighters)
+            {
+                if (enemy->getX() == targetCell->getCol() && enemy->getY() == targetCell->getRow())
+                {
+                    Shoot(bullets, *enemy);
+                    break;
+                }
+            }
+        }
+        state = FighterState::MOVING;
+        break;
+
+    case FighterState::DEAD:
+        return; // Do nothing
+    }
+}
+

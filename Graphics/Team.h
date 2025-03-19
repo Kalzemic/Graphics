@@ -16,7 +16,7 @@ private:
 public: 
 	Team(Room room, const int color);
 	~Team() { }
-	void TakeTurn(int board[MSZ][MSZ]);
+	void TakeTurn(int board[MSZ][MSZ], Team* enemy, std::vector<std::unique_ptr<Bullet>>& bullets);
 	int getColor() { return color; }
 	std::array<std::unique_ptr<Fighter>, 2>& getFighters() { return fighters; }
 	std::unique_ptr<Squire>& getSquire() { return squire; }

@@ -16,24 +16,24 @@ using namespace std;
 const int WIDTH = 700;
 const int HEIGHT = 700;
 
-const int NUM_ROOMS = 6;
+
 
 const double WALL_COST = 5;
 const double SPACE_COST = 1;
 
 Room* rooms[NUM_ROOMS];
+
+bool bulletFired = false;
+bool grenadeThrown = false;
+Bullet* pb = nullptr;
+Grenade* pg = nullptr;
 Team* blue;
 Team* red;
 bool fight = false;
-bool bulletFired = false;
-bool grenadeThrown = false;
-Bullet* pb=nullptr;
-Grenade* pg = nullptr;
 
-
-
+vector<unique_ptr<Bullet>> bullets;
 int maze[MSZ][MSZ] = { 0 }; // WALLs
-double security_map[MSZ][MSZ] = {0}; // 
+double security_map[MSZ][MSZ] = { 0 }; // 
 
 
 void RestorePath(Cell* pc)
@@ -52,9 +52,9 @@ void RestorePath(Cell* pc)
 // row, col are the indices of neighbor cell
 void AddNeighbor(int r, int c, Cell* pCurrent,
 	priority_queue<Cell*, vector<Cell*>, CompareCells>& pq,
-	vector <Cell>& grays,  vector <Cell> &black) // blacks shouldn't be changed
+	vector <Cell>& grays, vector <Cell>& black) // blacks shouldn't be changed
 {
-	double newg,cost;
+	double newg, cost;
 	vector<Cell>::iterator itGray;
 	vector<Cell>::iterator itBlack;
 
@@ -90,7 +90,7 @@ void AddNeighbor(int r, int c, Cell* pCurrent,
 
 				// and do the same with PQ
 				vector<Cell*> tmp;
-				while (!pq.empty() &&  !((*pq.top()) == (*pNeighbor)))
+				while (!pq.empty() && !((*pq.top()) == (*pNeighbor)))
 				{
 					tmp.push_back(pq.top()); // save the top element in tmp
 					pq.pop(); // remove top element from pq
@@ -130,7 +130,7 @@ void BuildPath(int index1, int index2)
 	tr = rooms[index2]->getCenterY();
 	tc = rooms[index2]->getCenterX();
 	Cell* pCurrent;
-	Cell* start = new Cell(r,c ,tr ,tc , 0, nullptr);
+	Cell* start = new Cell(r, c, tr, tc, 0, nullptr);
 	priority_queue<Cell*, vector<Cell*>, CompareCells> pq;
 	vector <Cell> grays;
 	vector <Cell> black;
@@ -139,7 +139,7 @@ void BuildPath(int index1, int index2)
 	pq.push(start);
 	grays.push_back(*start);
 	// pq shouldn't be empty because we are going to reach the target beforehand
-	while (!pq.empty()) 	
+	while (!pq.empty())
 	{
 		pCurrent = pq.top();
 		if (pCurrent->getH() < 0.001) // this is a targt cell
@@ -168,11 +168,11 @@ void BuildPath(int index1, int index2)
 			if (r + 1 < MSZ)
 				AddNeighbor(r + 1, c, pCurrent, pq, grays, black);
 			// down
-			if (r - 1 >=0)
+			if (r - 1 >= 0)
 				AddNeighbor(r - 1, c, pCurrent, pq, grays, black);
 			// left
 			if (c - 1 >= 0)
-				AddNeighbor(r , c-1, pCurrent, pq, grays, black);
+				AddNeighbor(r, c - 1, pCurrent, pq, grays, black);
 			// right
 			if (c + 1 < MSZ)
 				AddNeighbor(r, c + 1, pCurrent, pq, grays, black);
@@ -196,7 +196,7 @@ void BuildPathBetweenTheRooms()
 
 void SetupDungeon()
 {
-	int i,j;
+	int i, j;
 	int cx, cy, w, h;
 	bool hasOverlap;
 
@@ -209,21 +209,19 @@ void SetupDungeon()
 			h = 6 + rand() % (MSZ / 5);
 			cx = 2 + w / 2 + rand() % (MSZ - w - 4);
 			cy = 2 + h / 2 + rand() % (MSZ - h - 4);
-			for(j=0;j<i && !hasOverlap;j++)
+			for (j = 0;j < i && !hasOverlap;j++)
 				hasOverlap = rooms[j]->Overlap(cx, cy, w, h);
 		} while (hasOverlap); // check the validity of the room
-			
-		rooms[i] = new Room(cx, cy, w, h,maze);
+
+		rooms[i] = new Room(cx, cy, w, h, maze);
 	}
 
 	blue = new Team(*rooms[rand() % NUM_ROOMS], BLUE);
 	red = new Team(*rooms[rand() % NUM_ROOMS], RED);
-
-
 	for (i = 0;i < 100;i++)
 		maze[rand() % MSZ][rand() % MSZ] = WALL;
 	BuildPathBetweenTheRooms();
-	
+
 	int x;
 	int y;
 	for (int i = 0;i < 4;i++)
@@ -240,15 +238,14 @@ void SetupDungeon()
 		else
 			maze[y][x] = HEALTH;
 	}
-	
-	
+
+
 	maze[blue->getFighters()[0]->getY()][blue->getFighters()[0]->getX()] = BLUE;
 	maze[blue->getFighters()[1]->getY()][blue->getFighters()[1]->getX()] = BLUE;
 	maze[blue->getSquire()->getY()][blue->getSquire()->getX()] = BLUE_SQUIRE;
 	maze[red->getFighters()[0]->getY()][red->getFighters()[0]->getX()] = RED;
 	maze[red->getFighters()[1]->getY()][red->getFighters()[1]->getX()] = RED;
 	maze[red->getSquire()->getY()][red->getSquire()->getX()] = RED_SQUIRE;
-	
 
 }
 
@@ -267,7 +264,7 @@ void ShowDungeon()
 	int i, j;
 	double s;
 
-	for(i=0;i<MSZ;i++)
+	for (i = 0;i < MSZ;i++)
 		for (j = 0;j < MSZ;j++)
 		{
 			s = security_map[i][j];
@@ -280,7 +277,6 @@ void ShowDungeon()
 			case WALL:
 				glColor3d(0.3, 0.3, 0.4); // dark gray
 				break;
-
 			case BLUE:
 				glColor3d(0, 0, 1);
 				break;
@@ -300,14 +296,16 @@ void ShowDungeon()
 			case HEALTH:
 				glColor3d(0, 1, 0);
 				break;
-			
+			case BULLET:
+				glColor3d(1,0.5,0);
+				break;
 			}
 			// show cell
 			glBegin(GL_POLYGON);
 			glVertex2d(j, i);
 			glVertex2d(j, i + 1);
-			glVertex2d(j+1, i + 1);
-			glVertex2d(j + 1, i );
+			glVertex2d(j + 1, i + 1);
+			glVertex2d(j + 1, i);
 			glEnd();
 		}
 }
@@ -340,7 +338,7 @@ void display()
 	glutSwapBuffers(); // show all
 }
 
-void idle() 
+void idle()
 {
 	if (bulletFired)
 		pb->move(maze);
@@ -348,16 +346,12 @@ void idle()
 		pg->expand(maze);
 	if (fight)
 	{
-		if (rand() % 2)
+		for (int i = 0;i < bullets.size();i++)
 		{
-			blue->TakeTurn(maze);
-			red->TakeTurn(maze);
+			bullets[i]->Update(maze);
 		}
-		else
-		{
-			red->TakeTurn(maze);
-			blue->TakeTurn(maze);
-		}
+		blue->TakeTurn(maze,red,bullets);
+		red->TakeTurn(maze,blue, bullets);
 	}
 	glutPostRedisplay(); // indirect call to display
 }
@@ -386,13 +380,13 @@ void mouse(int button, int state, int x, int y)
 {
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-//		pb = new Bullet(MSZ*x/(double)WIDTH,
-//			MSZ* (HEIGHT - y) / (double)HEIGHT, (rand() % 360)* PI / 180);
+		//		pb = new Bullet(MSZ*x/(double)WIDTH,
+		//			MSZ* (HEIGHT - y) / (double)HEIGHT, (rand() % 360)* PI / 180);
 
 		pg = new Grenade(MSZ * (HEIGHT - y) / (double)HEIGHT, MSZ * x / (double)WIDTH);
 	}
 }
-int main(int argc, char* argv[]) 
+void main(int argc, char* argv[])
 {
 	glutInit(&argc, argv);
 	// definitions for visual memory (Frame buffer) and double buffer
@@ -405,7 +399,7 @@ int main(int argc, char* argv[])
 	glutDisplayFunc(display);
 	// idle is a update function
 	glutIdleFunc(idle);
-	
+
 	glutMouseFunc(mouse);
 
 	// menu
@@ -420,5 +414,4 @@ int main(int argc, char* argv[])
 	init();
 
 	glutMainLoop();
-	return 0;
 }

@@ -16,6 +16,7 @@ public:
 	Cell* getParent() { return parent; }
 	void ComputeH();
 
+	double distance();
 	double getF() { return f; }
 	double getH() { return h; }
 	double getG() { return g; }
